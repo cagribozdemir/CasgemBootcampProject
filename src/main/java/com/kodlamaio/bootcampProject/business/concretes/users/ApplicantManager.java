@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.kodlamaio.bootcampProject.business.abstracts.users.ApplicantService;
+import com.kodlamaio.bootcampProject.business.constants.BusinessMessages;
 import com.kodlamaio.bootcampProject.business.constants.Messages;
 import com.kodlamaio.bootcampProject.business.requests.applicant.CreateApplicantRequest;
 import com.kodlamaio.bootcampProject.business.requests.applicant.UpdateApplicantRequest;
@@ -13,6 +14,7 @@ import com.kodlamaio.bootcampProject.business.responses.applicant.CreateApplican
 import com.kodlamaio.bootcampProject.business.responses.applicant.GetAllApplicantsResponse;
 import com.kodlamaio.bootcampProject.business.responses.applicant.GetApplicantResponse;
 import com.kodlamaio.bootcampProject.business.responses.applicant.UpdateApplicantResponse;
+import com.kodlamaio.bootcampProject.core.utilities.exceptions.BusinessException;
 import com.kodlamaio.bootcampProject.core.utilities.mapping.ModelMapperService;
 import com.kodlamaio.bootcampProject.core.utilities.results.DataResult;
 import com.kodlamaio.bootcampProject.core.utilities.results.Result;
@@ -40,6 +42,7 @@ public class ApplicantManager implements ApplicantService {
 
 	@Override
 	public DataResult<CreateApplicantResponse> add(CreateApplicantRequest createApplicantRequest) {
+		checkIfApplicantExistsByNationalId(createApplicantRequest.getNationalIdentity());
 		Applicant applicant = modelMapperService.forRequest().map(createApplicantRequest, Applicant.class);
 		applicantRepository.save(applicant);
 		CreateApplicantResponse createApplicantResponse = modelMapperService.forResponse().map(applicant,
@@ -49,13 +52,14 @@ public class ApplicantManager implements ApplicantService {
 
 	@Override
 	public Result delete(int id) {
-		Applicant applicant = applicantRepository.findById(id).get();
+		Applicant applicant = checkIfApplicantExistsById(id);
 		applicantRepository.delete(applicant);
 		return new SuccessResult(Messages.ApplicantDeleted);
 	}
 
 	@Override
 	public DataResult<UpdateApplicantResponse> update(UpdateApplicantRequest updateApplicantRequest) {
+		checkIfApplicantExistsById(updateApplicantRequest.getId());
 		Applicant applicant = modelMapperService.forRequest().map(updateApplicantRequest, Applicant.class);
 		applicantRepository.save(applicant);
 		UpdateApplicantResponse updateApplicantResponse = modelMapperService.forResponse().map(applicant,
@@ -65,8 +69,23 @@ public class ApplicantManager implements ApplicantService {
 
 	@Override
 	public DataResult<GetApplicantResponse> getById(int id) {
-		Applicant applicant = applicantRepository.findById(id).get();
+		Applicant applicant = checkIfApplicantExistsById(id);
 		GetApplicantResponse applicantResponse = modelMapperService.forResponse().map(applicant, GetApplicantResponse.class);
 		return new SuccessDataResult<GetApplicantResponse>(applicantResponse); 
+	}
+	
+	private void checkIfApplicantExistsByNationalId(String nationalId) {
+		var result = applicantRepository.findByNationalIdentity(nationalId);
+		if (result != null) {
+			throw new BusinessException(BusinessMessages.ApplicantExists);
+		}
+	}
+	
+	private Applicant checkIfApplicantExistsById(int id) {
+		Applicant applicant = applicantRepository.findById(id).orElse(null);
+		if (applicant != null) {
+			return applicant;
+		}
+		throw new BusinessException(BusinessMessages.ApplicantNoExists);
 	}
 }

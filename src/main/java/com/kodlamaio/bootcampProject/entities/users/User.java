@@ -1,5 +1,7 @@
 package com.kodlamaio.bootcampProject.entities.users;
 
+import java.time.LocalDate;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -36,4 +38,12 @@ public class User {
 
 	@Column(name = "password")
 	private String password;
+	
+	@Column(name = "dateOfBirth")
+	private LocalDate dateOfBirth;
+	
+	@Column(name = "nationalIdentity")
+	private String nationalIdentity;
+	
+	
 }

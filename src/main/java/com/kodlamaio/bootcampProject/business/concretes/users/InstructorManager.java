@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.kodlamaio.bootcampProject.business.abstracts.users.InstructorService;
+import com.kodlamaio.bootcampProject.business.constants.BusinessMessages;
 import com.kodlamaio.bootcampProject.business.constants.Messages;
 import com.kodlamaio.bootcampProject.business.requests.instructor.CreateInstructorRequest;
 import com.kodlamaio.bootcampProject.business.requests.instructor.UpdateInstructorRequest;
@@ -13,6 +14,7 @@ import com.kodlamaio.bootcampProject.business.responses.instructor.CreateInstruc
 import com.kodlamaio.bootcampProject.business.responses.instructor.GetAllInstructorResponse;
 import com.kodlamaio.bootcampProject.business.responses.instructor.GetInstructorResponse;
 import com.kodlamaio.bootcampProject.business.responses.instructor.UpdateInstructorResponse;
+import com.kodlamaio.bootcampProject.core.utilities.exceptions.BusinessException;
 import com.kodlamaio.bootcampProject.core.utilities.mapping.ModelMapperService;
 import com.kodlamaio.bootcampProject.core.utilities.results.DataResult;
 import com.kodlamaio.bootcampProject.core.utilities.results.Result;
@@ -32,9 +34,8 @@ public class InstructorManager implements InstructorService {
 	@Override
 	public DataResult<List<GetAllInstructorResponse>> getAll() {
 		List<Instructor> instructors = instructorRepository.findAll();
-		List<GetAllInstructorResponse> response = instructors.stream()
-				.map(instructor -> this.modelMapperService.forResponse()
-				.map(instructor, GetAllInstructorResponse.class))
+		List<GetAllInstructorResponse> response = instructors.stream().map(
+				instructor -> this.modelMapperService.forResponse().map(instructor, GetAllInstructorResponse.class))
 				.collect(Collectors.toList());
 
 		return new SuccessDataResult<List<GetAllInstructorResponse>>(response, Messages.InstructorListed);
@@ -42,6 +43,7 @@ public class InstructorManager implements InstructorService {
 
 	@Override
 	public DataResult<CreateInstructorResponse> add(CreateInstructorRequest createInstructorRequest) {
+		checkIfInstructorExistsByNationalId(createInstructorRequest.getNationalIdentity());
 		Instructor instructor = modelMapperService.forRequest().map(createInstructorRequest, Instructor.class);
 		instructorRepository.save(instructor);
 		CreateInstructorResponse createInstructorResponse = modelMapperService.forResponse().map(instructor,
@@ -51,13 +53,15 @@ public class InstructorManager implements InstructorService {
 
 	@Override
 	public Result delete(int id) {
-		instructorRepository.deleteById(id);
+		Instructor instructor = checkIfEmployeeExistsById(id);
+		instructorRepository.delete(instructor);
 
 		return new SuccessResult(Messages.InstructorDeleted);
 	}
 
 	@Override
 	public DataResult<UpdateInstructorResponse> update(UpdateInstructorRequest updateInstructorRequest) {
+		checkIfEmployeeExistsById(updateInstructorRequest.getId());
 		Instructor instructor = modelMapperService.forRequest().map(updateInstructorRequest, Instructor.class);
 		instructorRepository.save(instructor);
 		UpdateInstructorResponse updateInstructorResponse = modelMapperService.forResponse().map(instructor,
@@ -67,9 +71,24 @@ public class InstructorManager implements InstructorService {
 
 	@Override
 	public DataResult<GetInstructorResponse> getById(int id) {
-		Instructor instructor = instructorRepository.findById(id).get();
-		GetInstructorResponse getInstructorResponse = modelMapperService.forResponse().map(instructor, GetInstructorResponse.class);
+		Instructor instructor = checkIfEmployeeExistsById(id);
+		GetInstructorResponse getInstructorResponse = modelMapperService.forResponse().map(instructor,
+				GetInstructorResponse.class);
 		return new SuccessDataResult<GetInstructorResponse>(getInstructorResponse);
 	}
 
+	private void checkIfInstructorExistsByNationalId(String nationalId) {
+		var result = instructorRepository.findByNationalIdentity(nationalId);
+		if(result != null) {
+			throw new BusinessException(BusinessMessages.InstructorExists);
+		}
+	}
+	
+	private Instructor checkIfEmployeeExistsById(int id) {
+		Instructor instructor = instructorRepository.findById(id).orElse(null);
+		if (instructor == null) {
+			throw new BusinessException(BusinessMessages.InstructorNoExists);
+		}
+		return instructor;
+	}
 }

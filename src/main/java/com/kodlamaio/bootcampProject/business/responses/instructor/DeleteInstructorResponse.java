@@ -1,5 +1,7 @@
 package com.kodlamaio.bootcampProject.business.responses.instructor;
 
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,4 +16,6 @@ public class DeleteInstructorResponse {
 	private String email;
 	private String password;
 	private String companyName;
+	private String nationalId;
+	private LocalDate dateOfBirth;
 }
