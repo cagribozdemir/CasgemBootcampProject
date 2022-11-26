@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.kodlamaio.bootcampProject.business.abstracts.BlackListService;
+import com.kodlamaio.bootcampProject.business.abstracts.users.ApplicantService;
 import com.kodlamaio.bootcampProject.business.constants.BusinessMessages;
 import com.kodlamaio.bootcampProject.business.constants.Messages;
 import com.kodlamaio.bootcampProject.business.requests.blackList.CreateBlackListRequest;
@@ -30,6 +31,7 @@ import lombok.AllArgsConstructor;
 public class BlackListManager implements BlackListService {
 	private BlackListRepository blackListRepository;
 	private ModelMapperService modelMapperService;
+	private ApplicantService applicantService;
 
 	@Override
 	public DataResult<List<GetAllBlackListsResponse>> getAll() {
@@ -52,6 +54,7 @@ public class BlackListManager implements BlackListService {
 
 	@Override
 	public DataResult<CreateBlackListResponse> add(CreateBlackListRequest createBlackListRequest) {
+		checkIfApplicantExists(createBlackListRequest.getApplicantId());
 		BlackList blackList = modelMapperService.forRequest().map(createBlackListRequest, BlackList.class);
 		blackListRepository.save(blackList);
 		CreateBlackListResponse createBlackListResponse = modelMapperService.forResponse().map(blackList,
@@ -68,6 +71,7 @@ public class BlackListManager implements BlackListService {
 
 	@Override
 	public DataResult<UpdateBlackListResponse> update(UpdateBlackListRequest updateBlackListRequest) {
+		checkIfApplicantExists(updateBlackListRequest.getApplicantId());
 		checkIfBlackListExistsById(updateBlackListRequest.getId());
 		BlackList blackList = modelMapperService.forRequest().map(updateBlackListRequest, BlackList.class);
 		blackListRepository.save(blackList);
@@ -91,6 +95,11 @@ public class BlackListManager implements BlackListService {
 		}
 	}
 
-	
+	private void checkIfApplicantExists(int applicantId) {
+		var result = applicantService.getById(applicantId);
+		if (result == null) {
+			throw new BusinessException(BusinessMessages.ApplicantNoExists);
+		}
+	}
 
 }

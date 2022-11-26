@@ -2,6 +2,8 @@ package com.kodlamaio.bootcampProject.webApi.users;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +42,7 @@ public class InstructorsController {
 	}
 
 	@PostMapping("/add")
-	public DataResult<CreateInstructorResponse> add(@RequestBody CreateInstructorRequest createInstructorRequest) {
+	public DataResult<CreateInstructorResponse> add(@Valid @RequestBody CreateInstructorRequest createInstructorRequest) {
 		return instructorService.add(createInstructorRequest);
 	}
 
@@ -50,7 +52,7 @@ public class InstructorsController {
 	}
 
 	@PutMapping()
-	public DataResult<UpdateInstructorResponse> update(@RequestBody UpdateInstructorRequest updateInstructorRequest) {
+	public DataResult<UpdateInstructorResponse> update(@Valid @RequestBody UpdateInstructorRequest updateInstructorRequest) {
 		return instructorService.update(updateInstructorRequest);
 	}
 

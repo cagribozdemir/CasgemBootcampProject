@@ -13,7 +13,7 @@ public class Messages {
 	public static final String EmployeeUpdated = "Employee Updated";
 	
 	public static final String ApplicantListed = "Applicants Listed";
-	public static final String ApplicantCreated = "Employee Added";
+	public static final String ApplicantCreated = "Applicant Added";
 	public static final String ApplicantDeleted = "Applicant Deleted";
 	public static final String ApplicantUpdated = "Applicant Updated";
 	

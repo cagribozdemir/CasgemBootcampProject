@@ -53,6 +53,7 @@ public class ApplicantManager implements ApplicantService {
 	@Override
 	public Result delete(int id) {
 		Applicant applicant = checkIfApplicantExistsById(id);
+		
 		applicantRepository.delete(applicant);
 		return new SuccessResult(Messages.ApplicantDeleted);
 	}
@@ -60,6 +61,7 @@ public class ApplicantManager implements ApplicantService {
 	@Override
 	public DataResult<UpdateApplicantResponse> update(UpdateApplicantRequest updateApplicantRequest) {
 		checkIfApplicantExistsById(updateApplicantRequest.getId());
+		
 		Applicant applicant = modelMapperService.forRequest().map(updateApplicantRequest, Applicant.class);
 		applicantRepository.save(applicant);
 		UpdateApplicantResponse updateApplicantResponse = modelMapperService.forResponse().map(applicant,
@@ -70,6 +72,7 @@ public class ApplicantManager implements ApplicantService {
 	@Override
 	public DataResult<GetApplicantResponse> getById(int id) {
 		Applicant applicant = checkIfApplicantExistsById(id);
+		
 		GetApplicantResponse applicantResponse = modelMapperService.forResponse().map(applicant, GetApplicantResponse.class);
 		return new SuccessDataResult<GetApplicantResponse>(applicantResponse); 
 	}

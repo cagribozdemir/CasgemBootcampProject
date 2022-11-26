@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.kodlamaio.bootcampProject.business.abstracts.BootcampService;
+import com.kodlamaio.bootcampProject.business.abstracts.users.InstructorService;
 import com.kodlamaio.bootcampProject.business.constants.BusinessMessages;
 import com.kodlamaio.bootcampProject.business.constants.Messages;
 import com.kodlamaio.bootcampProject.business.requests.bootcamp.CreateBootcampRequest;
@@ -30,6 +31,7 @@ import lombok.AllArgsConstructor;
 public class BootcampManager implements BootcampService {
 	private BootcampRepository bootcampRepository;
 	private ModelMapperService modelMapperService;
+	private InstructorService instructorService;
 
 	@Override
 	public DataResult<List<GetAllBootcampsResponse>> getAll() {
@@ -52,6 +54,7 @@ public class BootcampManager implements BootcampService {
 
 	@Override
 	public DataResult<CreateBootcampResponse> add(CreateBootcampRequest createBootcampRequest) {
+		checkIfInstructorExists(createBootcampRequest.getInstructorId());
 		Bootcamp bootcamp = modelMapperService.forRequest().map(createBootcampRequest, Bootcamp.class);
 		bootcamp.setId(0);
 		bootcampRepository.save(bootcamp);
@@ -69,6 +72,7 @@ public class BootcampManager implements BootcampService {
 
 	@Override
 	public DataResult<UpdateBootcampResponse> update(UpdateBootcampRequest updateBootcampRequest) {
+		checkIfInstructorExists(updateBootcampRequest.getInstructorId());
 		checkIfBootcampExistsById(updateBootcampRequest.getId());
 		Bootcamp bootcamp = modelMapperService.forRequest().map(updateBootcampRequest, Bootcamp.class);
 		bootcampRepository.save(bootcamp);
@@ -82,6 +86,13 @@ public class BootcampManager implements BootcampService {
 		Bootcamp bootcamp = bootcampRepository.findById(id).orElse(null);
 		if (bootcamp == null) {
 			throw new BusinessException(BusinessMessages.BootcampNoExists);
+		}
+	}
+	
+	private void checkIfInstructorExists(int instructorId) {
+		var result = instructorService.getById(instructorId);
+		if (result == null) {
+			throw new BusinessException(BusinessMessages.InstructorNoExists);
 		}
 	}
 

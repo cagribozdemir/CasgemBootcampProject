@@ -52,7 +52,7 @@ public class ApplicationsController {
 	}
 	
 	@PutMapping()
-	public DataResult<UpdateApplicationResponse> update(@RequestBody UpdateApplicationRequest updateBootcampRequest) {
+	public DataResult<UpdateApplicationResponse> update(@Valid @RequestBody UpdateApplicationRequest updateBootcampRequest) {
 		return applicationService.update(updateBootcampRequest);
 	}
 }

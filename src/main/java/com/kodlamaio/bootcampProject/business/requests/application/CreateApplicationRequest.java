@@ -11,10 +11,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class CreateApplicationRequest {
+	@NotNull
+	@NotEmpty
+	@Min(0)
 	private int applicantId;
-	@Min(2)
+	@NotNull
+	@NotEmpty
+	@Min(0)
 	private int bootcampId;
-	@Min(2)
+	@NotNull
+	@NotEmpty
 	private int state;
 }
 

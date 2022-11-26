@@ -6,7 +6,9 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.kodlamaio.bootcampProject.business.abstracts.BlackListService;
+import com.kodlamaio.bootcampProject.business.abstracts.BootcampService;
 import com.kodlamaio.bootcampProject.business.abstracts.applications.ApplicationService;
+import com.kodlamaio.bootcampProject.business.abstracts.users.ApplicantService;
 import com.kodlamaio.bootcampProject.business.constants.BusinessMessages;
 import com.kodlamaio.bootcampProject.business.constants.Messages;
 import com.kodlamaio.bootcampProject.business.requests.application.CreateApplicationRequest;
@@ -32,6 +34,8 @@ public class ApplicationManager implements ApplicationService {
 	private ApplicationRepository applicationRepository;
 	private ModelMapperService modelMapperService;
 	private BlackListService blackListService;
+	private ApplicantService applicantService;
+	private BootcampService bootcampService;
 
 	@Override
 	public DataResult<List<GetAllApplicationsResponse>> getAll() {
@@ -45,6 +49,7 @@ public class ApplicationManager implements ApplicationService {
 	@Override
 	public DataResult<GetApplicationResponse> getById(int id) {
 		checkIfApplicationExistsById(id);
+		
 		Application application = applicationRepository.findById(id).get();
 		GetApplicationResponse getApplicationResponse = modelMapperService.forResponse().map(application, GetApplicationResponse.class);
 		return new SuccessDataResult<GetApplicationResponse>(getApplicationResponse);
@@ -52,7 +57,10 @@ public class ApplicationManager implements ApplicationService {
 
 	@Override
 	public DataResult<CreateApplicationResponse> add(CreateApplicationRequest createApplicationRequest) {
+		checkIfApplicantExists(createApplicationRequest.getApplicantId());
+		checkIfBootcampExists(createApplicationRequest.getBootcampId());
 		checkIfApplicationExistsByBlackList(createApplicationRequest.getApplicantId());
+		
 		Application application = modelMapperService.forRequest().map(createApplicationRequest, Application.class);
 		applicationRepository.save(application);
 		CreateApplicationResponse createApplicationResponse = modelMapperService.forResponse().map(application, CreateApplicationResponse.class);
@@ -62,13 +70,18 @@ public class ApplicationManager implements ApplicationService {
 	@Override
 	public Result delete(int id) {
 		checkIfApplicationExistsById(id);
+		
 		applicationRepository.deleteById(id);
 		return new SuccessResult(Messages.ApplicationDeleted);
 	}
 
 	@Override
 	public DataResult<UpdateApplicationResponse> update(UpdateApplicationRequest updateApplicationRequest) {
+		checkIfApplicantExists(updateApplicationRequest.getApplicantId());
+		checkIfBootcampExists(updateApplicationRequest.getBootcampId());
+		checkIfApplicationExistsByBlackList(updateApplicationRequest.getApplicantId());
 		checkIfApplicationExistsById(updateApplicationRequest.getId());
+		
 		Application application = modelMapperService.forRequest().map(updateApplicationRequest, Application.class);
 		applicationRepository.save(application);
 		UpdateApplicationResponse updateApplicationResponse = modelMapperService.forResponse().map(application, UpdateApplicationResponse.class);
@@ -87,5 +100,18 @@ public class ApplicationManager implements ApplicationService {
 			throw new BusinessException(BusinessMessages.InBlackList);
 		}
 	}
-
+	
+	private void checkIfApplicantExists(int applicantId) {
+		var result = applicantService.getById(applicantId);
+		if (result == null) {
+			throw new BusinessException(BusinessMessages.ApplicantNoExists);
+		}
+	}
+	
+	private void checkIfBootcampExists(int bootcampId) {
+		var result = bootcampService.getById(bootcampId);
+		if (result==null) {
+			throw new BusinessException(BusinessMessages.BootcampNoExists);
+		}
+	}
 }

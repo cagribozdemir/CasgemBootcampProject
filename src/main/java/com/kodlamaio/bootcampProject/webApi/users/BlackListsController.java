@@ -2,6 +2,8 @@ package com.kodlamaio.bootcampProject.webApi.users;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +42,7 @@ public class BlackListsController {
 	}
 
 	@PostMapping("/add")
-	public DataResult<CreateBlackListResponse> add(@RequestBody CreateBlackListRequest createBlackListRequest) {
+	public DataResult<CreateBlackListResponse> add(@Valid @RequestBody CreateBlackListRequest createBlackListRequest) {
 		return blackListService.add(createBlackListRequest);
 	}
 
@@ -50,7 +52,7 @@ public class BlackListsController {
 	}
 
 	@PutMapping()
-	public DataResult<UpdateBlackListResponse> update(@RequestBody UpdateBlackListRequest updateBlackListRequest) {
+	public DataResult<UpdateBlackListResponse> update(@Valid @RequestBody UpdateBlackListRequest updateBlackListRequest) {
 		return blackListService.update(updateBlackListRequest);
 	}
 }

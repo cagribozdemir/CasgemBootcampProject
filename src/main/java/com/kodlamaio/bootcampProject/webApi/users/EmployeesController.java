@@ -2,6 +2,8 @@ package com.kodlamaio.bootcampProject.webApi.users;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +42,7 @@ public class EmployeesController {
 	}
 	
 	@PostMapping("/add")
-	public DataResult<CreateEmployeeResponse> add(@RequestBody CreateEmployeeRequest createEmployeeRequest) {
+	public DataResult<CreateEmployeeResponse> add(@Valid @RequestBody CreateEmployeeRequest createEmployeeRequest) {
 		return employeeService.add(createEmployeeRequest);
 	}
 	
@@ -50,7 +52,7 @@ public class EmployeesController {
 	}
 	
 	@PutMapping()
-	public DataResult<UpdateEmployeeResponse> update(@RequestBody UpdateEmployeeRequest updateEmployeeRequest) {
+	public DataResult<UpdateEmployeeResponse> update(@Valid @RequestBody UpdateEmployeeRequest updateEmployeeRequest) {
 		return employeeService.update(updateEmployeeRequest);
 	}
 	
